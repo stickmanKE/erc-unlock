@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toyota ERC Unlock Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ── Theme variables ── */
+[data-theme="light"] {
+  --bg:        #f0f4f8;
+  --surface:   #ffffff;
+  --surface2:  #f7f9fb;
+  --border:    #e2e8f0;
+  --border2:   #cbd5e1;
+  --text:      #1a202c;
+  --text2:     #4a5568;
+  --muted:     #94a3b8;
+  --accent:    #0d9488;
+  --accent-h:  #0f766e;
+  --accent-bg: #f0fdfa;
+  --accent-bd: #99f6e4;
+  --warn:      #ef4444;
+  --warn-bg:   #fef2f2;
+  --success:   #10b981;
+  --shadow:    0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+}
+[data-theme="dark"] {
+  --bg:        #0f1117;
+  --surface:   #1a1d26;
+  --surface2:  #12141c;
+  --border:    #2a2f3e;
+  --border2:   #3a4050;
+  --text:      #e8edf5;
+  --text2:     #94a3b8;
+  --muted:     #4a5568;
+  --accent:    #2dd4bf;
+  --accent-h:  #5eead4;
+  --accent-bg: rgba(45,212,191,0.08);
+  --accent-bd: rgba(45,212,191,0.25);
+  --warn:      #f87171;
+  --warn-bg:   rgba(248,113,113,0.08);
+  --success:   #34d399;
+  --shadow:    0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px 16px 48px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.page-wrap {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* ── Top bar ── */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.brand-icon svg { width: 20px; height: 20px; }
+
+.brand-text h1 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.brand-text p {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-btn {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+.theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-title svg { width: 14px; height: 14px; opacity: 0.7; }
+
+/* ── ERC Input ── */
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+}
+
+.char-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.char-count.valid   { color: var(--success); }
+.char-count.invalid { color: var(--warn); }
+
+.input-wrap {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.erc-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 44px 13px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 17px;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  outline: none;
+  text-transform: uppercase;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.3s;
+}
+
+.erc-input::placeholder {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.erc-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.erc-input.has-error {
+  border-color: var(--warn);
+  box-shadow: 0 0 0 3px var(--warn-bg);
+}
+
+.clear-btn {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  padding: 4px; border-radius: 4px;
+  display: flex; align-items: center;
+  transition: color 0.2s;
+}
+.clear-btn:hover { color: var(--text); }
+
+/* ── Model chips ── */
+.model-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.model-chip {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text2);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.model-chip:hover  { border-color: var(--accent); color: var(--accent); }
+.model-chip.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Generate button ── */
+.gen-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.gen-btn:hover:not(:disabled) {
+  background: var(--accent-h);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(13,148,136,0.3);
+}
+.gen-btn:active:not(:disabled) { transform: translateY(0); }
+.gen-btn:disabled {
+  background: var(--border2);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* ── Error ── */
+.error-msg {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--warn);
+}
+.error-msg.visible { display: flex; align-items: center; gap: 6px; }
+
+/* ── Result ── */
+.result-card {
+  display: none;
+  background: var(--accent-bg);
+  border: 1.5px solid var(--accent-bd);
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 16px;
+  animation: slideUp 0.25s ease;
+}
+.result-card.visible { display: block; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.code-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 34px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+}
+
+.action-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--accent-bd);
+  background: var(--surface);
+  color: var(--accent);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.action-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.action-btn.active { background: var(--accent); color: #fff; }
+.action-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* ── History ── */
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.clear-history-btn {
+  font-size: 11px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+.clear-history-btn:hover { color: var(--warn); }
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.history-list::-webkit-scrollbar { width: 4px; }
+.history-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.history-item:hover { border-color: var(--accent); }
+
+.hi-model {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.hi-erc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text2);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hi-arrow { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+.hi-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Tip / Support card ── */
+.tip-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.tip-intro {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.tip-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tip-method {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.15s;
+}
+.tip-method:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.tip-logo {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.tip-logo.mpesa  { background: #169847; }
+.tip-logo.paypal { background: #003087; }
+
+.tip-info { flex: 1; }
+
+.tip-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.tip-detail {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text2);
+}
+
+.tip-arrow {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  padding-top: 8px;
+  line-height: 1.7;
+}
+
+/* ── Print styles ── */
+@media print {
+  body { background: #fff !important; padding: 20px; }
+  .topbar, .model-grid, .gen-btn, .action-btns, .tip-card,
+  .history-card, .footer, .theme-btn, .clear-btn { display: none !important; }
+  .card, .result-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+  .result-card { display: block !important; }
+  .print-header { display: block !important; }
+}
+
+.print-header {
+  display: none;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.print-header h2 { font-size: 20px; }
+.print-header p  { font-size: 13px; color: #666; margin-top: 4px; }
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0 14px;
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Print header (hidden on screen) -->
+  <div class="print-header">
+    <h2>Toyota ERC Unlock Code</h2>
+    <p>Generated by ERC Unlock Tool</p>
+  </div>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="10" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          <circle cx="12" cy="16" r="1.5" fill="#fff" stroke="none"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>ERC Unlock</h1>
+        <p>Toyota Head Unit Decoder</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-btn" id="themeBtn" title="Toggle theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main calculator card -->
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+      ERC Code Entry
+    </div>
+
+    <div class="field-row">
+      <span class="field-label">16-Digit ERC Serial</span>
+      <span class="char-count" id="charCount">0 / 16</span>
+    </div>
+
+    <div class="input-wrap">
+      <input
+        type="text"
+        class="erc-input"
+        id="ercInput"
+        placeholder="e.g. 82988AE13BC3A4C0"
+        maxlength="16"
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <button class="clear-btn" id="clearBtn" title="Clear">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="field-row" style="margin-bottom:8px">
+      <span class="field-label">Radio Model</span>
+    </div>
+    <div class="model-grid" id="modelGrid">
+      <div class="model-chip active" data-model="NSCD-W66">NSCD-W66</div>
+      <div class="model-chip" data-model="NSCP-W64">NSCP-W64</div>
+      <div class="model-chip" data-model="NSZT-W66T">NSZT-W66T</div>
+      <div class="model-chip" data-model="NSZT-W64">NSZT-W64</div>
+      <div class="model-chip" data-model="NSZT-W62G">NSZT-W62G</div>
+      <div class="model-chip" data-model="OTHER">Other</div>
+    </div>
+
+    <button class="gen-btn" id="genBtn" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      Generate Unlock Code
+    </button>
+
+    <div class="error-msg" id="errorMsg">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="errorText"></span>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card" id="resultCard">
+      <div class="result-label">✓ Unlock Code Generated</div>
+      <div class="divider"></div>
+      <div class="result-row">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500;">ENTER THIS CODE ON YOUR UNIT</div>
+          <div class="code-value" id="codeValue">--------</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">
+        ERC: <span id="resultErc" style="font-family:'JetBrains Mono',monospace;"></span>
+        &nbsp;·&nbsp; Model: <span id="resultModel"></span>
+      </div>
+      <div class="action-btns">
+        <button class="action-btn" id="copyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Code
+        </button>
+        <button class="action-btn" id="whatsappBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Share via WhatsApp
+        </button>
+        <button class="action-btn" id="printBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / Save PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History card -->
+  <div class="card" id="historyCard" style="display:none;">
+    <div class="history-header">
+      <div class="card-title" style="margin-bottom:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Recent Lookups
+      </div>
+      <button class="clear-history-btn" id="clearHistoryBtn">Clear all</button>
+    </div>
+    <div class="divider"></div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- Tip / Support card -->
+  <div class="tip-card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Support This Tool
+    </div>
+    <p class="tip-intro">This tool is free to use. If it saved you time and money, a small tip keeps it running and maintained. Thank you! 🙏</p>
+    <div class="tip-methods">
+      <a class="tip-method" href="https://wa.me/254715197114" target="_blank" rel="noopener">
+        <div class="tip-logo mpesa">
+          <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
+            <text x="4" y="28" font-size="22" font-family="Arial" font-weight="bold" fill="white">M</text>
+          </svg>
+        </div>
+        <div class="tip-info">
+          <div class="tip-name">M-Pesa — Mark</div>
+          <div class="tip-detail">0715 197 114</div>
+        </div>
+        <div class="tip-arrow">›</div>
+      </a>
+      <a class="tip-method" href="https://paypal.me/techiemak" target="_blank" rel="noopener">
+        <div class="tip-logo paypal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.59 3.025-2.566 6.082-8.558 6.082H9.825l-1.152 7.301h3.402c.524 0 .968-.382 1.05-.9l.894-5.652h2.19c4.298 0 6.926-1.748 7.798-6.544z"/>
+          </svg>
+        </div>
+        <div class="tip-info">
+          <div class="tip-name">PayPal</div>
+          <div class="tip-detail">techiemak@gmail.com</div>
+        </div>
+        <div class="tip-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">
+    Toyota ERC Unlock · Supports all W5x–W6x series<br>
+    Free tool · Works offline · No data stored externally
+  </div>
+
+</div><!-- end page-wrap -->
+
+<script>
+// ── ERC Algorithm ──────────────────────────────────────────────────
+// Ported from Berks/python_erc & alexeyfadeev/erc-calculator (C#)
+// Verified against multiple known ERC→code pairs
+
+function getReverse(x) {
+  let r = 0;
+  for (let i = 0; i < 32; i++) {
+    const bit = (x >>> (31 - i)) & 1;
+    r |= (bit << i);
+  }
+  return r >>> 0;
+}
+
+function decodeERC(erc) {
+  erc = erc.trim().toUpperCase();
+  if (erc.length !== 16) return null;
+  if (!/^[0-9A-F]{16}$/.test(erc)) return null;
+  const fp   = parseInt(erc.slice(0, 8), 16) >>> 0;
+  const sp   = parseInt(erc.slice(8, 16), 16) >>> 0;
+  const xor  = (fp ^ getReverse(sp)) >>> 0;
+  const res  = ((xor - 0x0E010A11) + 0x100000000) >>> 0;
+  return res.toString(16).toUpperCase().padStart(8, '0');
+}
+
+// ── State ──────────────────────────────────────────────────────────
+let history = JSON.parse(localStorage.getItem('erc_history') || '[]');
+let selectedModel = 'NSCD-W66';
+let currentCode = '';
+let currentERC  = '';
+
+// ── DOM refs ──────────────────────────────────────────────────────
+const ercInput      = document.getElementById('ercInput');
+const charCount     = document.getElementById('charCount');
+const genBtn        = document.getElementById('genBtn');
+const clearBtn      = document.getElementById('clearBtn');
+const errorMsg      = document.getElementById('errorMsg');
+const errorText     = document.getElementById('errorText');
+const resultCard    = document.getElementById('resultCard');
+const codeValue     = document.getElementById('codeValue');
+const resultErc     = document.getElementById('resultErc');
+const resultModel   = document.getElementById('resultModel');
+const copyBtn       = document.getElementById('copyBtn');
+const whatsappBtn   = document.getElementById('whatsappBtn');
+const printBtn      = document.getElementById('printBtn');
+const historyCard   = document.getElementById('historyCard');
+const historyList   = document.getElementById('historyList');
+const clearHistBtn  = document.getElementById('clearHistoryBtn');
+const modelGrid     = document.getElementById('modelGrid');
+const themeBtn      = document.getElementById('themeBtn');
+
+// ── Theme ──────────────────────────────────────────────────────────
+const savedTheme = localStorage.getItem('erc_theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+
+themeBtn.addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('erc_theme', next);
+  updateThemeIcon(next);
+});
+
+function updateThemeIcon(theme) {
+  const icon = document.getElementById('themeIcon');
+  if (theme === 'dark') {
+    icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+  } else {
+    icon.innerHTML = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+  }
+}
+
+// ── Model selector ─────────────────────────────────────────────────
+modelGrid.querySelectorAll('.model-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    modelGrid.querySelectorAll('.model-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    selectedModel = chip.dataset.model;
+  });
+});
+
+// ── Input ──────────────────────────────────────────────────────────
+ercInput.addEventListener('input', () => {
+  const raw = ercInput.value.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+  ercInput.value = raw;
+  const len = raw.length;
+  charCount.textContent = `${len} / 16`;
+  charCount.className = 'char-count' + (len === 16 ? ' valid' : len > 0 ? ' invalid' : '');
+  genBtn.disabled = len !== 16;
+  ercInput.classList.toggle('has-error', len > 0 && len !== 16);
+  if (len !== 16) {
+    resultCard.classList.remove('visible');
+    errorMsg.classList.remove('visible');
+  }
+});
+
+clearBtn.addEventListener('click', () => {
+  ercInput.value = '';
+  ercInput.dispatchEvent(new Event('input'));
+  ercInput.focus();
+});
+
+// ── Generate ───────────────────────────────────────────────────────
+genBtn.addEventListener('click', generate);
+ercInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !genBtn.disabled) generate(); });
+
+function generate() {
+  const erc = ercInput.value.toUpperCase();
+  const code = decodeERC(erc);
+
+  if (!code) {
+    errorText.textContent = 'Invalid ERC — must be exactly 16 hex characters (0–9, A–F)';
+    errorMsg.classList.add('visible');
+    resultCard.classList.remove('visible');
+    return;
+  }
+
+  errorMsg.classList.remove('visible');
+  currentCode = code;
+  currentERC  = erc;
+
+  codeValue.textContent  = code;
+  resultErc.textContent  = erc;
+  resultModel.textContent = selectedModel;
+  resultCard.classList.add('visible');
+
+  // Save history
+  const entry = { erc, code, model: selectedModel, ts: Date.now() };
+  history = [entry, ...history.filter(h => h.erc !== erc)].slice(0, 15);
+  localStorage.setItem('erc_history', JSON.stringify(history));
+  renderHistory();
+}
+
+// ── Copy ───────────────────────────────────────────────────────────
+copyBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(currentCode).then(() => {
+    copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+    copyBtn.classList.add('active');
+    setTimeout(() => {
+      copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Code`;
+      copyBtn.classList.remove('active');
+    }, 2000);
+  });
+});
+
+// ── WhatsApp share ─────────────────────────────────────────────────
+whatsappBtn.addEventListener('click', () => {
+  const msg = `Toyota ERC Unlock Code\n\nModel: ${selectedModel}\nERC: ${currentERC}\nUnlock Code: *${currentCode}*\n\nGenerated with Toyota ERC Unlock Tool`;
+  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+});
+
+// ── Print / Save PDF ───────────────────────────────────────────────
+printBtn.addEventListener('click', () => {
+  window.print();
+});
+
+// ── History ────────────────────────────────────────────────────────
+clearHistBtn.addEventListener('click', () => {
+  history = [];
+  localStorage.removeItem('erc_history');
+  renderHistory();
+});
+
+function renderHistory() {
+  if (history.length === 0) {
+    historyCard.style.display = 'none';
+    return;
+  }
+  historyCard.style.display = 'block';
+  historyList.innerHTML = history.map(h => `
+    <div class="history-item" data-erc="${h.erc}" data-model="${h.model}">
+      <span class="hi-model">${h.model}</span>
+      <span class="hi-erc">${h.erc}</span>
+      <span class="hi-arrow">→</span>
+      <span class="hi-code">${h.code}</span>
+    </div>
+  `).join('');
+
+  historyList.querySelectorAll('.history-item').forEach(item => {
+    item.addEventListener('click', () => {
+      ercInput.value = item.dataset.erc;
+      // Set matching model chip
+      modelGrid.querySelectorAll('.model-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.model === item.dataset.model);
+      });
+      selectedModel = item.dataset.model;
+      ercInput.dispatchEvent(new Event('input'));
+      generate();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+renderHistory();
+</script>
+</body>
+</html>
